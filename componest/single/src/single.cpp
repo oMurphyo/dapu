@@ -55,33 +55,33 @@ CSingle::CSingle()
     syllable.name = (char *)malloc(SYLLABLE_NAME_SIZE);
 }
 
-CSingle::CSingle(Syllable_t *pSyllable,unsigned char syl_channel,unsigned int syl_delaytime,unsigned char syl_strength_hit,unsigned char syl_strength_release)
-{
-    pSyl = pSyllable;
+// CSingle::CSingle(Syllable_t *pSyllable,unsigned char syl_channel,unsigned int syl_delaytime,unsigned char syl_strength_hit,unsigned char syl_strength_release)
+// {
+//     pSyl = pSyllable;
 
-    syllable.name = pSyl->name;
-    syllable.tone = pSyl->tone;
-    syllable.tone_quality = pSyl->tone_quality;
-    syllable.loudness = pSyl->loudness;
-    syllable.interval = pSyl->interval;
+//     syllable.name = pSyl->name;
+//     syllable.tone = pSyl->tone;
+//     syllable.tone_quality = pSyl->tone_quality;
+//     syllable.loudness = pSyl->loudness;
+//     syllable.interval = pSyl->interval;
 
-    channel = syl_channel;
-    delaytime = syl_delaytime;
-    strength_hit = syl_strength_hit;
-    strength_release = syl_strength_release;
+//     channel = syl_channel;
+//     delayTime = syl_delaytime;
+//     strength_hit = syl_strength_hit;
+//     strength_release = syl_strength_release;
     
-}
+// }
 
 CSingle::~CSingle()
 {
     free(syllable.name);
 }
 
-int CSingle::Play()
-{
+// int CSingle::Play()
+// {
 
-    return 0;
-}
+//     return 0;
+// }
 
 /*
     格式: 音高      通道(0-15)  保持时间（ticks）   延迟时间（ticks）
@@ -94,9 +94,127 @@ int CSingle::Play()
             83 60 80 3c 40
     返回： 生成的数据字节数
 */
-int CSingle::Write(char *filename)
+// int CSingle::Write(char *filename)
+// {
+//     static int cnt = 0;
+//     char *pSyllableName = syllable.name;
+
+//     static int rel_pitch = 0;          //相对音高
+//     static int abs_pitch = 0;          //绝对音高
+//     static int row = 5;                 //默认从中音（中央C开始 3C）
+//     static int col = 0;
+
+//     while((*pSyllableName != '\0')&&(*pSyllableName != '\n'))
+//     {
+//         switch (*pSyllableName)
+//         {
+//         case '1':
+//             col = 0;
+//             break;
+//         case '2':
+//             col = 2;
+//             break;
+//         case '3':
+//             col = 4;
+//             break;
+//         case '4':
+//             col = 5;
+//             break;
+//         case '5':
+//             col = 7;
+//             break;
+//         case '6':
+//             col = 9;
+//             break;
+//         case '7':
+//             col = 11;
+//             break;
+//         case 'h':
+//         case 'H':
+//             if(row<TABLE_GAMUT_ROW_MAX)  row++;
+//             break;
+//         case 'm':
+//         case 'M':
+//             //row = row;
+//             break;
+//         case 'l':
+//         case 'L':
+//             if(row>0)    row--;
+//             break;
+//         case 'b':       //半音
+//         case 'B':
+//         case '#':
+//             col++;
+//         default:
+//             break;
+//         }
+//         pSyllableName++;
+//     }
+
+//     //查表
+//     abs_pitch = table_gamut[row][col];
+
+//     //cmd & channel
+//     static unsigned char cmd= 0x0;
+
+//     //delaytime
+//     static unsigned short int delayTime;
+//     delayTime = DynamicByteConversion(delayTime);
+
+//     //Keeptime
+//     static unsigned short int keeptime;
+//     keeptime = DynamicByteConversion(syllable.interval);
+
+//     //strength
+// //    static unsigned char strength_hit = 100;
+// //    static unsigned char strength_release = 64;
+
+//     //output file
+//     //  O_RDWR | O_CREAT | O_APPEND
+//     FILE *fp;
+//     fp = fopen(filename,"ab+");
+//     if(fp == NULL)
+//         cout<<"File is not available"<<endl;
+    
+//     int res = 0;
+//     unsigned char buff[5];
+
+//     w2b_t w2bTmp;
+//     //写按下键指令
+//     w2bTmp.w = delayTime;
+//     if (w2bTmp.hsb != 0)
+//     {
+//         res = fwrite(&(w2bTmp.hsb),1,1,fp);
+//         cnt++;
+//     }
+//     res = fwrite(&(w2bTmp.lsb),1,1,fp);
+//     cmd = 0x90 | channel;
+//     res = fwrite(&(cmd),1,1,fp);    
+//     res = fwrite(&(abs_pitch),1,1,fp);
+//     res = fwrite(&(strength_hit),1,1,fp);
+//     //写释放键指令
+//     w2bTmp.w = keeptime;
+//     if (w2bTmp.hsb != 0)
+//     {
+//         res = fwrite(&(w2bTmp.hsb),1,1,fp);
+//         cnt++;
+//     }
+//     res = fwrite(&(w2bTmp.lsb),1,1,fp);
+//     cmd = 0x80 | channel;
+//     res = fwrite(&(cmd),1,1,fp);    
+//     res = fwrite(&(abs_pitch),1,1,fp);
+//     res = fwrite(&(strength_release),1,1,fp);
+
+//     cnt += 8;
+
+//     fclose(fp);    
+
+//     return cnt;
+// }
+
+int CSingle::Conversion2Midi()
 {
-    static int cnt = 0;
+    int index = 0;
     char *pSyllableName = syllable.name;
 
     static int rel_pitch = 0;          //相对音高
@@ -159,55 +277,53 @@ int CSingle::Write(char *filename)
 
     //delaytime
     static unsigned short int delayTime;
-    delayTime = DynamicByteConversion(delaytime);
+    delayTime = DynamicByteConversion(delayTime);
 
     //Keeptime
     static unsigned short int keeptime;
     keeptime = DynamicByteConversion(syllable.interval);
 
-    //strength
-//    static unsigned char strength_hit = 100;
-//    static unsigned char strength_release = 64;
-
-    //output file
-    //  O_RDWR | O_CREAT | O_APPEND
-    FILE *fp;
-    fp = fopen(filename,"ab+");
-    if(fp == NULL)
-        cout<<"File is not available"<<endl;
-    
-    int res = 0;
-    unsigned char buff[5];
+    //清空buff
+    for(int i=0;i<10;i++)
+        buff_midi[i] = 0;
 
     w2b_t w2bTmp;
     //写按下键指令
     w2bTmp.w = delayTime;
     if (w2bTmp.hsb != 0)
     {
-        res = fwrite(&(w2bTmp.hsb),1,1,fp);
-        cnt++;
+        buff_midi[index] = w2bTmp.hsb;
+        index++;
     }
-    res = fwrite(&(w2bTmp.lsb),1,1,fp);
+    buff_midi[index++] = w2bTmp.lsb;
     cmd = 0x90 | channel;
-    res = fwrite(&(cmd),1,1,fp);    
-    res = fwrite(&(abs_pitch),1,1,fp);
-    res = fwrite(&(strength_hit),1,1,fp);
+    buff_midi[index++] = cmd;
+    buff_midi[index++] = abs_pitch;
+    buff_midi[index++] = strength_hit;
+
     //写释放键指令
     w2bTmp.w = keeptime;
     if (w2bTmp.hsb != 0)
     {
-        res = fwrite(&(w2bTmp.hsb),1,1,fp);
-        cnt++;
+        buff_midi[index] = w2bTmp.hsb;
+        index++;
     }
-    res = fwrite(&(w2bTmp.lsb),1,1,fp);
+    buff_midi[index++] = w2bTmp.lsb;
     cmd = 0x80 | channel;
-    res = fwrite(&(cmd),1,1,fp);    
-    res = fwrite(&(abs_pitch),1,1,fp);
-    res = fwrite(&(strength_release),1,1,fp);
+    buff_midi[index++] = cmd;
+    buff_midi[index++] = abs_pitch;
+    buff_midi[index++] = strength_release;
 
-    cnt += 8;
-
-    fclose(fp);    
-
-    return cnt;
+    count = index;
+    
+    return index;
 }
+
+
+
+
+
+
+
+
+

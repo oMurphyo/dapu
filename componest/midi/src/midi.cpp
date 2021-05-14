@@ -16,11 +16,6 @@ CMidi::CMidi()
 
 }
 
-CMidi::CMidi(char *m_fname)
-{
-    fname = m_fname;
-}
-
 CMidi::~CMidi()
 {
 

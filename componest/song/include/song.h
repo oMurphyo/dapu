@@ -20,6 +20,8 @@ public:
     CSong();
     ~CSong();
 
+    int play();
+
     //曲子名称
     string name;        
 
@@ -37,7 +39,7 @@ public:
     //连音符
 
     //特殊标记
-    
+
     //渐强渐弱符
     
     //显示位置
@@ -47,7 +49,7 @@ public:
 
     list<CSingle> single;
 
-    int play();
+    int count;          //音符个数
 
 
 };

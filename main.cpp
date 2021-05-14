@@ -89,7 +89,9 @@ int main (int argc,char **argv)
         cout<<pInputFileName<<"is not available"<<endl;
 
 //    err = CreatMidiFileHeader(pOutputFileName);
-    CMidi *pMidi = new CMidi(pOutputFileName);
+    CMidi *pMidi = new CMidi();
+    pMidi->fname = pOutputFileName;
+    
     if(pMidi == NULL)
         cout<<"Create output midi file fault"<<endl;
 
@@ -100,37 +102,65 @@ int main (int argc,char **argv)
     fileHeaderBlock.data.dddd = 0x01E0;
     pMidi->Write(fileHeaderBlock);
 
+    //准备音轨数据
     AudioTrackHeader_t audioTrackHeader;
     pMidi->Write(audioTrackHeader);
     
 
-    CSingle *pSyl = new CSingle();
-
     char buff[64];
 
-    int cnt = 0;
+    CSingle *pSingle;
+
     while(!feof(fp))
     {
         res = Getline(fp,buff);
-
-        res = PopAParameter(pSyl->syllable.name,buff);
+        pSingle = new CSingle();
+        res = PopAParameter(pSingle->syllable.name,buff);
         char tmp[64];
         res = PopAParameter(tmp,buff);
-        pSyl->channel = atoi(tmp);
+        pSingle->channel = atoi(tmp);
         res = PopAParameter(tmp,buff);
-        pSyl->syllable.interval = atoi(tmp);
+        pSingle->syllable.interval = atoi(tmp);
         res = PopAParameter(tmp,buff);
-        pSyl->delaytime = atoi(tmp);
+        pSingle->delayTime = atoi(tmp);
 
-        cnt += pSyl->Write(pOutputFileName);
+        
+        pMidi->singleList.push_back(pSingle);
     }
-    //写音轨结束事件
+
+    int cnt = 0;
+     for (std::list<CSingle *>::iterator it = pMidi->singleList.begin(); it != pMidi->singleList.end(); ++it) 
+     {
+         (*it)->Conversion2Midi();
+
+         cnt += (*it)->count;
+     }
+
+    cout<<"all bytes is "<<cnt<<endl;
+
+    // int cnt = 0;
+    // while(!feof(fp))
+    // {
+    //     res = Getline(fp,buff);
+
+    //     res = PopAParameter(pSyl->syllable.name,buff);
+    //     char tmp[64];
+    //     res = PopAParameter(tmp,buff);
+    //     pSyl->channel = atoi(tmp);
+    //     res = PopAParameter(tmp,buff);
+    //     pSyl->syllable.interval = atoi(tmp);
+    //     res = PopAParameter(tmp,buff);
+    //     pSyl->delayTime = atoi(tmp);
+
+    //     cnt += pSyl->Write(pOutputFileName);
+    // }
+    // //写音轨结束事件
     
-    pMidi->WriteAudioTrackEnd();
+//    pMidi->WriteAudioTrackEnd();
     //计算整个音轨数据长度，重写AudioTrackHeader_t数据
-    cnt += 4;
-    audioTrackHeader.len = cnt;
-    pMidi->Write(audioTrackHeader);
+    
+//    pMidi->Write(audioTrackHeader);
+
     fclose(fp);
 
     return 0;

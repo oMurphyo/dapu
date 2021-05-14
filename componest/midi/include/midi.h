@@ -124,9 +124,9 @@ using namespace std;
     //Midi 事件
     struct MidiEvent_t
     {
-        unsigned char code;
-        unsigned char syllable;
-        unsigned char strength;
+        unsigned char code;             //操作码
+        unsigned char syllable;         //音符
+        unsigned char strength;         //力度
     };
     typedef struct MidiEvent_t MidiEvent_t;
 
@@ -196,8 +196,7 @@ class CMidi
 {
     
 public:
-    CMidi();
-    CMidi(char *m_fname);
+    CMidi();    
     ~CMidi();
 
     Err_t open() ;
@@ -211,7 +210,7 @@ public:
     Err_t Write(AudioTrackEnd_t audioTrackEnd);
     Err_t WriteAudioTrackEnd();
 
-    Err_t Syllable2Midi(Syllable_t syl);
+//    Err_t Syllable2Midi(Syllable_t syl);
 
     int CalculateAudioTrackDataLength();
 
@@ -229,7 +228,7 @@ public:
     // MetaEvent_t metaEvent;
     // AudioTrackEnd_t audioTrackEnd;
 
-    list<CSingle> single;
+    list<CSingle *> singleList;
 
 private:
 
