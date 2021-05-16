@@ -212,19 +212,11 @@ CSingle::~CSingle()
 //     return cnt;
 // }
 
-int CSingle::Conversion2Midi()
+Err_t CSingle::SetAbsPitch(char *pStr)
 {
-    int index = 0;
-    char *pSyllableName = syllable.name;
-
-    static int rel_pitch = 0;          //相对音高
-    static int abs_pitch = 0;          //绝对音高
-    static int row = 5;                 //默认从中音（中央C开始 3C）
-    static int col = 0;
-
-    while((*pSyllableName != '\0')&&(*pSyllableName != '\n'))
+    while((*pStr != '\0')&&(*pStr != '\n'))
     {
-        switch (*pSyllableName)
+        switch (*pStr)
         {
         case '1':
             col = 0;
@@ -266,11 +258,82 @@ int CSingle::Conversion2Midi()
         default:
             break;
         }
-        pSyllableName++;
+        pStr++;
     }
 
-    //查表
     abs_pitch = table_gamut[row][col];
+
+    return Err_OK;
+}
+
+Err_t CSingle::SetAbsPitch(int tab_row,int tab_col)
+{
+    row = tab_row;
+    col = tab_col;
+    abs_pitch = table_gamut[tab_row][tab_col];
+
+    return Err_OK;
+}
+
+int CSingle::Conversion2Midi()
+{
+    int index = 0;
+//    char *pSyllableName = syllable.name;
+
+    static int rel_pitch = 0;          //相对音高
+//    static int abs_pitch = 0;          //绝对音高
+//    static int row = 5;                 //默认从中音（中央C开始 3C）
+//    static int col = 0;
+
+    // while((*pSyllableName != '\0')&&(*pSyllableName != '\n'))
+    // {
+    //     switch (*pSyllableName)
+    //     {
+    //     case '1':
+    //         col = 0;
+    //         break;
+    //     case '2':
+    //         col = 2;
+    //         break;
+    //     case '3':
+    //         col = 4;
+    //         break;
+    //     case '4':
+    //         col = 5;
+    //         break;
+    //     case '5':
+    //         col = 7;
+    //         break;
+    //     case '6':
+    //         col = 9;
+    //         break;
+    //     case '7':
+    //         col = 11;
+    //         break;
+    //     case 'h':
+    //     case 'H':
+    //         if(row<TABLE_GAMUT_ROW_MAX)  row++;
+    //         break;
+    //     case 'm':
+    //     case 'M':
+    //         //row = row;
+    //         break;
+    //     case 'l':
+    //     case 'L':
+    //         if(row>0)    row--;
+    //         break;
+    //     case 'b':       //半音
+    //     case 'B':
+    //     case '#':
+    //         col++;
+    //     default:
+    //         break;
+    //     }
+    //     pSyllableName++;
+    // }
+
+    //查表
+//    abs_pitch = table_gamut[row][col];
 
     //cmd & channel
     static unsigned char cmd= 0x0;

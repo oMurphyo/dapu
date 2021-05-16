@@ -67,6 +67,8 @@ public:
 
 //    int Write(char *filename);
 //    int Play();
+    Err_t SetAbsPitch(char * str);              //根据名称查表获取绝对音高
+    Err_t SetAbsPitch(int row,int tab_col);      //根据行号列号查表获取绝对音高
 
     int Conversion2Midi();
 
@@ -75,6 +77,9 @@ public:
     unsigned char channel;          //通道
     Syllable_t syllable;            //音节，包含：音符名称，时值，音量
     Syllable_t *pSyl;
+    int row = 5;
+    int col = 0;
+    int abs_pitch = 0;              //绝对音高
     unsigned int delayTime;         //延迟时间
     unsigned int specialFlag;       //特殊标记
     unsigned int voice;             //音量
@@ -86,11 +91,18 @@ public:
     Position_t position;            //位置
 
     unsigned char buff_midi[10];    //转换成midi后的代码存放位置
+    //伴奏单轨数据accompany
+    // unsigned char buff_ch1[10];   
+    // unsigned char buff_ch2[10];   
+    // unsigned char buff_ch3[10];   
+    // unsigned char buff_ch4[10];   
+    // unsigned char buff_ch10[10];    //打击乐音轨数据
 
     int index;                      //音符序号
     int count;                      //midi指令字节个数
 private:
     int DynamicByteConversion(int dt);        //动态字节转换
+
 
 };
 

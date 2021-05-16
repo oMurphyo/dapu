@@ -1,6 +1,7 @@
 
 
 #include "iostream"
+#include "iomanip"      //format
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -101,67 +102,92 @@ int main (int argc,char **argv)
     fileHeaderBlock.data.nnnn = 0x0002;
     fileHeaderBlock.data.dddd = 0x01E0;
     pMidi->Write(fileHeaderBlock);
-
-    //准备音轨数据
-    AudioTrackHeader_t audioTrackHeader;
-    pMidi->Write(audioTrackHeader);
     
-
     char buff[64];
 
     CSingle *pSingle;
+    CSingle *pHit;
 
     while(!feof(fp))
     {
         res = Getline(fp,buff);
         pSingle = new CSingle();
-        res = PopAParameter(pSingle->syllable.name,buff);
+        pHit = new CSingle();
         char tmp[64];
+        res = PopAParameter(pSingle->syllable.name,buff);
+        pSingle->SetAbsPitch(pSingle->syllable.name);
         res = PopAParameter(tmp,buff);
         pSingle->channel = atoi(tmp);
         res = PopAParameter(tmp,buff);
         pSingle->syllable.interval = atoi(tmp);
         res = PopAParameter(tmp,buff);
         pSingle->delayTime = atoi(tmp);
-
-        
         pMidi->singleList.push_back(pSingle);
+        
+        //打击音轨
+        pHit->syllable.name = pSingle->syllable.name;
+        pHit->SetAbsPitch(pHit->row-1,pHit->col);       //降8度音
+        pHit->channel = 0x09;
+        pHit->syllable.interval = pSingle->syllable.interval;
+        pHit->delayTime = pSingle->delayTime;
+        pHit->strength_hit = 0x5a;
+        pHit->strength_release = 0x00;
+        pMidi->accompanyList.push_back(pSingle);
     }
 
     int cnt = 0;
-     for (std::list<CSingle *>::iterator it = pMidi->singleList.begin(); it != pMidi->singleList.end(); ++it) 
-     {
-         (*it)->Conversion2Midi();
 
-         cnt += (*it)->count;
-     }
-
-    cout<<"all bytes is "<<cnt<<endl;
-
-    // int cnt = 0;
-    // while(!feof(fp))
-    // {
-    //     res = Getline(fp,buff);
-
-    //     res = PopAParameter(pSyl->syllable.name,buff);
-    //     char tmp[64];
-    //     res = PopAParameter(tmp,buff);
-    //     pSyl->channel = atoi(tmp);
-    //     res = PopAParameter(tmp,buff);
-    //     pSyl->syllable.interval = atoi(tmp);
-    //     res = PopAParameter(tmp,buff);
-    //     pSyl->delayTime = atoi(tmp);
-
-    //     cnt += pSyl->Write(pOutputFileName);
-    // }
-    // //写音轨结束事件
+    for (std::list<CSingle *>::iterator it = pMidi->singleList.begin(); it != pMidi->singleList.end(); ++it) 
+    {
+        (*it)->Conversion2Midi();
+        cnt += (*it)->count;
+    }
     
-//    pMidi->WriteAudioTrackEnd();
+//   cout<<"All bytes is "<<cnt<<endl;
+    //准备音轨数据
+    AudioTrackHeader_t audioTrackHeader;
+    audioTrackHeader.len = cnt + 3 + 4;     //切换乐器（3） + 音轨结束事件（4）
+    pMidi->Write(audioTrackHeader);
+    //切换乐器
+    MidiEvent_t midiEvent;
+    midiEvent.dt = 0;
+    midiEvent.code = 0xC0|0x01;
+    midiEvent.data1 = 0x73;
+    midiEvent.data2 = 0x00;
+    pMidi->Write(midiEvent);
     //计算整个音轨数据长度，重写AudioTrackHeader_t数据
+    pMidi->WriteSingle();
+    //写音轨结束事件
+    pMidi->WriteAudioTrackEnd();
+
+    cnt = 0;
+    for (list<CSingle *>::iterator it = pMidi->accompanyList.begin(); it != pMidi->accompanyList.end(); ++it) 
+    {
+        (*it)->Conversion2Midi();
+        cnt += (*it)->count;
+    }
     
-//    pMidi->Write(audioTrackHeader);
+//    cout<<"All bytes is "<<cnt<<endl;
+    //准备音轨数据
+//    AudioTrackHeader_t audioTrackHeader;
+    audioTrackHeader.len = cnt + 3 + 4;     //切换乐器（3） + 音轨结束事件（4）
+    pMidi->Write(audioTrackHeader);
+    //切换乐器
+//    MidiEvent_t midiEvent;
+    midiEvent.dt = 0;
+    midiEvent.code = 0xC9;
+    midiEvent.data1 = 0x21;
+    pMidi->Write(midiEvent);
+    //计算整个音轨数据长度，重写AudioTrackHeader_t数据
+    pMidi->WriteSingle();
+    //写音轨结束事件
+    pMidi->WriteAudioTrackEnd();
+
+    pMidi->close();    
 
     fclose(fp);
+
+    cout<<"Midi file create successful."<<endl;
 
     return 0;
 }

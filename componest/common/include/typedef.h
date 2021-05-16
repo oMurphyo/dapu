@@ -23,6 +23,16 @@
         };
     }w2b_t;    
 
+    typedef union dw2b_t
+    {
+        u32 dw;
+        struct{
+            u8 lsb;
+            u8 mlsb;
+            u8 mhsb;
+            u8 hsb;
+        };
+    }dw2b_t;    
 
     //故障码
     typedef enum
@@ -34,6 +44,10 @@
 
         //写文件
         Err_WriteFault,                 //文件写入错误
+
+
+        Err_MetaEventData,              //MetaEvent 消息数据错误
+
 
     }Err_t;
 

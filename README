@@ -1,0 +1,26 @@
+要在Linux下玩转MIDI，就得从这以下方面入手：
+
+驱动层：早期Linux用OSS来驱动声卡，而现在这一块基本上已经由ALSA来一统天下，当然ALSA也提供了OSS的兼容层来保证一些古老的应用。这年头，电脑装好Linux后能正常发声的话，ALSA应该就已经是在正常工作了。
+
+中间层：一些新的发行版都用PulseAudio做为一个应用中间层，通过它去统一应用软件与ALSA的接口。不过这个东西对于玩MIDI这种“专业”的事情来说，不是很有用。我们需要的是Jack。Jack是大部分音频处理软件所使用的输入输出组件，它具有高性能低延迟等优秀的特质。
+
+音源：如果声卡没有硬件的音源，或者硬件音源烂到只能发出电子味很重的声音。我们就需要一个软件音源，通过加载音色库（SoundFont）文件，把MIDI信号合成为声音。Linux下常用的软音源有fluidsynth或Timidity++。另外还需要准备合适的音色库文件。
+
+音序器：简单的说就是用来作曲的软件啦，由于把各种MIDI信号组合到一起形成一个音乐作品。上面说的Cakewalk就是一款Windows下的古董级的音序器了。在Linux下，最有名的当属Rosegarden了。
+
+最终的工作流程就是用Rosegarden谱曲，在fluidsynth或Timidity++中加载好音色库文件，用Jack把Rosegarden的General MIDI Device输出端口连接到fluidsynth或Timidity++生成的Synth输入端口。
+
+以Debian Squeeze为例，在ALSA工作正常的前提下，安装以下软件包及其依赖包：jackd, qjackctl(Jack的图形前端), qsynth(fluidsynth的图形前端）, rosegarden, fluid-soundfont-gm (一个音色库文件）。
+
+sudo aptitude install jackd qjackctl qsynth rosegarden fluid-soundfont-gm
+
+安装完后就可以启动JACK Control和Qsynth，首先点Qsynth界面上的Setup按钮，在Soundfonts页中指定要用的音色库文件，如：/usr/share/sounds/sf2/FluidR3_GM.sf2，重启音源引擎。然后可以打开Rosegarden，这时在JACK Control的Connect按钮对应的窗口的ALSA页中会可以看到Rosegarden的输出端口和Qsynth的输出端口，选中它们点“Connect”把它们连起来。同时确认一下在&quot;Audio“页中，Qsynth的输出端口也已经与”system“的playback端口连接正常。
+
+1 安装 timidity
+2 ./configure --enable-audio=alsa --enable-server --enable-alsaseq
+3 安装音源
+4 配置timidy 使用这个音源
+5 启动服务模式 timidity -iA -B2,8 -Os -EFreverb=0 
+6 查看端口 aconnect -l
+7 测试音乐 aplaymidi *.midi --port 128:0
+

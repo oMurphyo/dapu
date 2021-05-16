@@ -124,28 +124,31 @@ using namespace std;
     //Midi 事件
     struct MidiEvent_t
     {
-        unsigned char code;             //操作码
-        unsigned char syllable;         //音符
-        unsigned char strength;         //力度
+        unsigned short int dt;
+        unsigned char code;             //状态字(操作码)
+        unsigned char data1 = 0;
+        unsigned char data2 = 0;
     };
     typedef struct MidiEvent_t MidiEvent_t;
 
     //非Midi 事件，也叫元事件
     struct MetaEvent_t
     {
-        unsigned char flag;
+        unsigned short int dt;
+        unsigned char flag = 0xFF;         //0xFF
         unsigned char code;
-        unsigned char len;
+        unsigned char len = 0;
         unsigned char *pData;
     };
     typedef struct MetaEvent_t MetaEvent_t;
 
     struct AudioTrackEnd_t
     {
+        unsigned char dt;           //0x00
         unsigned char flag;         //0xFF
         unsigned char code;         //0x2F
         unsigned char len;          //0x00
-    };
+    } __attribute__((packed));
     typedef struct AudioTrackEnd_t AudioTrackEnd_t;
     
     struct AudioTrackBlock_t
@@ -157,37 +160,31 @@ using namespace std;
     };
     typedef struct AudioTrackBlock_t AudioTrackBlock_t;
 
-class CBlock
-{
-private:
-    /* data */
-public:
-    CBlock(/* args */);
-    ~CBlock();
+// class CBlock
+// {
+// private:
+//     /* data */
+// public:
+//     CBlock(/* args */);
+//     ~CBlock();
 
-    Err_t write();
+//     Err_t write();
 
-    unsigned char * pData;
-};
+//     unsigned char * pData;
+// };
 
-class CAudioTrackBlock : public CBlock
-{
-private:
-    /* data */
-public:
-    CAudioTrackBlock(/* args */);
-    ~CAudioTrackBlock();
+// class CAudioTrackBlock : public CBlock
+// {
+// private:
+//     /* data */
+// public:
+//     CAudioTrackBlock(/* args */);
+//     ~CAudioTrackBlock();
 
-    AudioTrackBlock_t audioTrackBlock;    
-};
+//     AudioTrackBlock_t audioTrackBlock;    
+// };
 
-CAudioTrackBlock::CAudioTrackBlock(/* args */)
-{
-}
 
-CAudioTrackBlock::~CAudioTrackBlock()
-{
-}
 
 
 
@@ -208,6 +205,9 @@ public:
     Err_t Write(MidiEvent_t midiEvent);
     Err_t Write(MetaEvent_t metaEvent);
     Err_t Write(AudioTrackEnd_t audioTrackEnd);
+
+    Err_t WriteSingle();
+//    Err_t WriteMetaEvent();
     Err_t WriteAudioTrackEnd();
 
 //    Err_t Syllable2Midi(Syllable_t syl);
@@ -221,14 +221,15 @@ public:
     FILE *fp;
 
     
-    FileHeaderBlock_t fileHeaderBlock;
-    AudioTrackBlock_t audioTrackBlock;
+//    FileHeaderBlock_t fileHeaderBlock;
+//    AudioTrackBlock_t audioTrackBlock;
     // AudioTrackHeader_t audioTrackHeader;
     // MidiEvent_t midiEvent;
     // MetaEvent_t metaEvent;
     // AudioTrackEnd_t audioTrackEnd;
 
     list<CSingle *> singleList;
+    list<CSingle *> accompanyList;      //伴奏，打击乐器，ch9 & ch10
 
 private:
 

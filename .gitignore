@@ -32,3 +32,6 @@
 *.d
 *.obj
 *.o
+./test
+./output
+
